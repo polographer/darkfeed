@@ -2,17 +2,17 @@
 
 A Pixelfed client built with Flutter featuring TikTok/Reels-style vertical navigation.
 
-# Disclaimer --- human
+# Honest Human Disclaimer
 
-I'm a experienced software engineer, however I never got chance to break into linux software development. This app was a plan that I had for years but never been able to materialize because of lack of time and kids. 
+I'm a experienced software engineer, however I never got chance to break into linux software development. This app was a plan that I had in my head for years but I've never been able to materialize because of lack of time and knowledge. 
 
-This app is vibe coded and I review the code as much as I can. However I know that the vibe coded apps are susceptible to bugs and rough edges. I'm fixing them because this is my daily driver. I use this app because I don't like the current ones.
+TBH this app is vibe coded and I review the code as much as I can. However I know that the vibe coded apps are susceptible to bugs and rough edges. I'm fixing them because this is my daily driver. I use this app because I don't like the current ones.
 
 Why? that leads me to my vision; I'm also a photographer and I belive that the way to look at photography is without distractions, when I was learning photography we used to print our digital photos and took time to view them separately, we sometimes put it in a togheter to "select" but never to admire, thats why the Instagram timline approach is a dilution in the photography art, and downplays the experience. 
 
-The closest I could imagine in this digital world is to view each picture in full screen and in a dark background, like in a darkroom, take our time to admire and dont have any other distraction (like the username, comments and likes). This is the idea behind this app, and I plan to distile it as much as possible.
+The closest I could imagine in this digital world is to view each picture in full screen and in a dark background, take our time to admire and dont have any other distraction (like the username, comments and likes). This is the idea behind this app, and I plan to distile it as much as possible.
 
-My main platforms are linux, mac and iOS. That's my main focus but if someone wants to contribute for other platforms, they are welcome.
+My main platforms are linux, iOS and mac (in order of importance). That's going to be my main focus but if someone wants to contribute for other platforms, they are welcome.
 
 ## Features
 
@@ -45,7 +45,7 @@ flutter pub get
 
 ## Running the App
 
-### Mobile/Desktop - tested the most on linux (debian trixie)
+### Mobile/Desktop - tested mostly on linux (debian trixie)
 ```bash
 flutter run
 ```
