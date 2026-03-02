@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=DarkFeed
+Comment=A Pixelfed client with vertical swipe navigation
+Exec=darkfeed
+Icon=darkfeed
+Type=Application
+Categories=Network;InstantMessaging;
+Terminal=false
+StartupWMClass=darkfeed
