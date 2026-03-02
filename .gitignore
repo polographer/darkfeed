@@ -161,3 +161,8 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# AppImage build artifacts
+/appimage/AppDir/
+/appimage/output/
+/tmp/appimagetool
