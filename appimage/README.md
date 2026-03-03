@@ -6,6 +6,18 @@ This directory contains the recipe and build scripts to create an AppImage for D
 
 AppImage is a universal software package format for Linux that allows applications to run on various distributions without installation. It bundles all dependencies into a single executable file.
 
+## Automated Builds (Recommended)
+
+AppImages are automatically built and attached to GitHub releases via GitHub Actions. When you create a new release, the workflow:
+- Automatically builds the AppImage
+- Names it with the correct version from the release tag
+- Attaches it to the release
+- Generates SHA256 checksums
+
+See `.github/workflows/README.md` for more details on the automated build process.
+
+## Manual Building
+
 ## Prerequisites
 
 ### Required Dependencies
@@ -47,14 +59,19 @@ AppImage is a universal software package format for Linux that allows applicatio
 From the project root directory:
 
 ```bash
+# Build with version from pubspec.yaml
 ./appimage/build-appimage.sh
+
+# Or specify a custom version
+./appimage/build-appimage.sh 1.2.0
 ```
 
 The script will:
-1. Build the Flutter Linux application in release mode
-2. Create an AppDir structure with all necessary files
-3. Bundle required libraries
-4. Generate the AppImage file
+1. Extract version from argument, pubspec.yaml, or default to 1.0.0
+2. Build the Flutter Linux application in release mode
+3. Create an AppDir structure with all necessary files
+4. Bundle required libraries
+5. Generate the AppImage file with the correct version number
 
 ### Output
 

@@ -13,8 +13,20 @@ echo -e "${GREEN}=== DarkFeed AppImage Builder ===${NC}"
 
 # Configuration
 APP_NAME="darkfeed"
-APP_VERSION="1.0.0"
+# Accept version as first argument, or extract from pubspec.yaml, or default to 1.0.0
+if [ -n "$1" ]; then
+    APP_VERSION="$1"
+elif [ -f "pubspec.yaml" ]; then
+    APP_VERSION=$(grep "^version:" pubspec.yaml | sed 's/version: *//' | sed 's/+.*//')
+    if [ -z "$APP_VERSION" ]; then
+        APP_VERSION="1.0.0"
+    fi
+else
+    APP_VERSION="1.0.0"
+fi
 ARCH=$(uname -m)
+
+echo -e "${GREEN}Building version: ${APP_VERSION}${NC}"
 BUILD_DIR="$(pwd)/build/linux/x64/release/bundle"
 APPDIR="$(pwd)/appimage/AppDir"
 OUTPUT_DIR="$(pwd)/appimage/output"

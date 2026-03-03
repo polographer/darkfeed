@@ -1,0 +1,106 @@
+name: Build and Release AppImage
+
+on:
+  release:
+    types: [created, published]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version number (e.g., 1.0.0)'
+        required: false
+        type: string
+
+jobs:
+  build-appimage:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Extract version from tag or input
+        id: version
+        run: |
+          if [ -n "${{ github.event.inputs.version }}" ]; then
+            VERSION="${{ github.event.inputs.version }}"
+          elif [ -n "${{ github.event.release.tag_name }}" ]; then
+            VERSION="${{ github.event.release.tag_name }}"
+            # Remove 'v' prefix if present
+            VERSION="${VERSION#v}"
+          else
+            # Extract from pubspec.yaml
+            VERSION=$(grep "^version:" pubspec.yaml | sed 's/version: *//' | sed 's/+.*//')
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Building version: $VERSION"
+      
+      - name: Install Flutter dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            clang \
+            cmake \
+            ninja-build \
+            pkg-config \
+            libgtk-3-dev \
+            libblkid-dev \
+            liblzma-dev \
+            libsecret-1-dev \
+            libsecret-1-0 \
+            wget \
+            file \
+            desktop-file-utils
+      
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      
+      - name: Verify Flutter installation
+        run: |
+          flutter --version
+          flutter doctor -v
+      
+      - name: Get Flutter dependencies
+        run: flutter pub get
+      
+      - name: Build AppImage
+        run: |
+          chmod +x appimage/build-appimage.sh
+          ./appimage/build-appimage.sh ${{ steps.version.outputs.version }}
+      
+      - name: Verify AppImage
+        run: |
+          ls -lh appimage/output/
+          file appimage/output/*.AppImage
+      
+      - name: Upload AppImage as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: darkfeed-${{ steps.version.outputs.version }}-x86_64-AppImage
+          path: appimage/output/*.AppImage
+          if-no-files-found: error
+      
+      - name: Upload AppImage to release
+        if: github.event_name == 'release'
+        uses: softprops/action-gh-release@v1
+        with:
+          files: appimage/output/*.AppImage
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Generate checksums
+        if: github.event_name == 'release'
+        run: |
+          cd appimage/output
+          sha256sum *.AppImage > checksums.txt
+          cat checksums.txt
+      
+      - name: Upload checksums to release
+        if: github.event_name == 'release'
+        uses: softprops/action-gh-release@v1
+        with:
+          files: appimage/output/checksums.txt
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
