@@ -1,6 +1,48 @@
 import 'dart:ui';
 
 import 'package:darkfeed/utils/constants.dart';
+import 'package:darkfeed/models/post.dart';
+
+/// Test fixtures for general testing
+class TestFixtures {
+  /// Create a test post with default or custom values
+  static Post createTestPost({
+    String id = '123',
+    String content = 'Test post content',
+    bool favourited = false,
+    bool reblogged = false,
+    int favouritesCount = 0,
+    int reblogsCount = 0,
+    int mediaCount = 2,
+  }) {
+    final mediaAttachments = List.generate(
+      mediaCount,
+      (index) => MediaAttachment(
+        id: 'media_$index',
+        type: 'image',
+        url: 'https://example.com/media_$index.jpg',
+        previewUrl: 'https://example.com/media_${index}_preview.jpg',
+        description: 'Test image $index',
+      ),
+    );
+
+    return Post(
+      id: id,
+      accountId: 'user123',
+      accountUsername: 'testuser',
+      accountDisplayName: 'Test User',
+      accountAvatar: 'https://example.com/avatar.jpg',
+      content: content,
+      createdAt: DateTime.now(),
+      mediaAttachments: mediaAttachments,
+      favourited: favourited,
+      reblogged: reblogged,
+      favouritesCount: favouritesCount,
+      reblogsCount: reblogsCount,
+      repliesCount: 0,
+    );
+  }
+}
 
 /// Test fixtures for window testing
 class WindowTestFixtures {
