@@ -53,6 +53,11 @@ class StorageKeys {
   static const String instanceUrl = 'instance_url';
   static const String userId = 'user_id';
   static const String username = 'username';
+
+  // Window state keys (desktop only)
+  static const String windowWidth = 'window_width';
+  static const String windowHeight = 'window_height';
+  static const String windowMaximized = 'window_maximized';
 }
 
 // Pagination

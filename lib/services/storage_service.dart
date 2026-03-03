@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -278,5 +278,47 @@ class StorageService {
     final expired = await isTokenExpired();
     debugPrint('StorageService: Token expired = $expired');
     return !expired;
+  }
+
+  // Window State Management (Desktop only - Shared Preferences)
+
+  /// Save window size
+  Future<void> saveWindowSize(double width, double height) async {
+    if (_prefs == null) await init();
+    await _prefs!.setDouble(StorageKeys.windowWidth, width);
+    await _prefs!.setDouble(StorageKeys.windowHeight, height);
+  }
+
+  /// Get window size (returns null if not saved)
+  Future<Size?> getWindowSize() async {
+    if (_prefs == null) await init();
+    final width = _prefs!.getDouble(StorageKeys.windowWidth);
+    final height = _prefs!.getDouble(StorageKeys.windowHeight);
+
+    if (width == null || height == null) {
+      return null;
+    }
+
+    return Size(width, height);
+  }
+
+  /// Save window maximized state
+  Future<void> saveWindowMaximized(bool maximized) async {
+    if (_prefs == null) await init();
+    await _prefs!.setBool(StorageKeys.windowMaximized, maximized);
+  }
+
+  /// Get window maximized state (returns null if not saved)
+  Future<bool?> isWindowMaximized() async {
+    if (_prefs == null) await init();
+    return _prefs!.getBool(StorageKeys.windowMaximized);
+  }
+
+  /// Check if any window settings exist
+  Future<bool> hasWindowSettings() async {
+    if (_prefs == null) await init();
+    return _prefs!.containsKey(StorageKeys.windowWidth) ||
+        _prefs!.containsKey(StorageKeys.windowHeight) ||
+        _prefs!.containsKey(StorageKeys.windowMaximized);
   }
 }

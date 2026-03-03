@@ -65,6 +65,12 @@ jobs:
       - name: Get Flutter dependencies
         run: flutter pub get
       
+      - name: Run tests
+        run: |
+          echo "Running tests before building..."
+          flutter test
+          echo "All tests passed!"
+      
       - name: Build AppImage
         run: |
           chmod +x appimage/build-appimage.sh

@@ -50,6 +50,9 @@ dependencies:
   cached_network_image: ^3.3.1
   desktop_webview_window: ^0.2.3
   url_launcher: ^6.3.2
+  
+  # Window Management (Desktop)
+  window_manager: ^0.3.9
 
 dev_dependencies:
   flutter_test:
@@ -61,6 +64,10 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^6.0.0
+  
+  # Testing
+  mockito: ^5.4.4
+  build_runner: ^2.4.8
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

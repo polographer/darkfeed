@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:window_manager/window_manager.dart';
 
 import 'providers/auth_provider.dart';
 import 'providers/instance_provider.dart';
@@ -10,7 +11,10 @@ import 'screens/timeline_screen.dart';
 import 'services/oauth_service.dart';
 import 'services/pixelfed_service.dart';
 import 'services/storage_service.dart';
+import 'services/window_manager_impl.dart';
+import 'services/window_service.dart';
 import 'utils/constants.dart';
+import 'utils/platform_utils.dart' as platform_utils;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -35,6 +39,13 @@ void main() async {
 
   final oauthService = OAuthService(storageService);
   final pixelfedService = PixelfedService(storageService);
+
+  // Initialize window management for desktop platforms
+  if (platform_utils.isDesktop) {
+    await windowManager.ensureInitialized();
+    final windowService = WindowService(storageService, WindowManagerImpl());
+    await windowService.initialize();
+  }
 
   // Set system UI overlay style for immersive experience
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);

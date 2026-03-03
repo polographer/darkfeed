@@ -1,0 +1,7 @@
+targets:
+  $default:
+    builders:
+      mockito:
+        generate_for:
+          - test/helpers/mock_storage_service.dart
+          - test/helpers/mock_window_manager.dart
