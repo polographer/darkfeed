@@ -2,7 +2,7 @@ name: Build and Release AppImage
 
 on:
   release:
-    types: [created, published]
+    types: [published]
   workflow_dispatch:
     inputs:
       version:
@@ -47,6 +47,7 @@ jobs:
             liblzma-dev \
             libsecret-1-dev \
             libsecret-1-0 \
+            libwebkit2gtk-4.1-dev \
             wget \
             file \
             desktop-file-utils
