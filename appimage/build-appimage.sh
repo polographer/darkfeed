@@ -44,7 +44,8 @@ if ! command -v appimagetool &> /dev/null; then
     APPIMAGETOOL_URL="https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-${ARCH}.AppImage"
     wget -O /tmp/appimagetool "${APPIMAGETOOL_URL}"
     chmod +x /tmp/appimagetool
-    APPIMAGETOOL="/tmp/appimagetool"
+    # Use --appimage-extract-and-run for CI environments without FUSE
+    APPIMAGETOOL="/tmp/appimagetool --appimage-extract-and-run"
 else
     APPIMAGETOOL="appimagetool"
 fi
@@ -125,7 +126,7 @@ echo -e "${GREEN}Step 9: Building AppImage...${NC}"
 APPIMAGE_NAME="${APP_NAME}-${APP_VERSION}-${ARCH}.AppImage"
 
 cd appimage
-"$APPIMAGETOOL" AppDir "output/$APPIMAGE_NAME"
+eval "$APPIMAGETOOL" AppDir "output/$APPIMAGE_NAME"
 cd ..
 
 # Step 10: Done
