@@ -3,7 +3,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:provider/provider.dart';
 
-import 'package:darkfeed/models/post.dart';
 import 'package:darkfeed/providers/auth_provider.dart';
 import 'package:darkfeed/providers/instance_provider.dart';
 import 'package:darkfeed/screens/instance_selector_screen.dart';

@@ -5,10 +5,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:provider/provider.dart';
 
-import 'package:darkfeed/models/post.dart';
 import 'package:darkfeed/providers/auth_provider.dart';
 import 'package:darkfeed/screens/login_screen.dart';
-import 'package:darkfeed/utils/constants.dart';
 
 import '../helpers/mock_oauth_service.mocks.dart';
 import '../helpers/mock_pixelfed_service.mocks.dart';
