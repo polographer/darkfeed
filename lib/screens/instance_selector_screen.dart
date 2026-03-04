@@ -66,112 +66,122 @@ class _InstanceSelectorScreenState extends State<InstanceSelectorScreen> {
     return Scaffold(
       appBar: AppBar(title: const Text('Select Instance')),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const SizedBox(height: 32),
-              // App title/logo
-              Text(
-                appName,
-                style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                  color: AppColors.primaryColor,
-                  fontWeight: FontWeight.bold,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'A Pixelfed client',
-                style: Theme.of(
-                  context,
-                ).textTheme.bodyLarge?.copyWith(color: AppColors.secondaryText),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 48),
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 500),
+            child: Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const SizedBox(height: 32),
+                  // App title/logo
+                  Text(
+                    appName,
+                    style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                      color: AppColors.primaryColor,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'A Pixelfed client',
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      color: AppColors.secondaryText,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 48),
 
-              // Custom instance input
-              TextField(
-                controller: _instanceController,
-                decoration: InputDecoration(
-                  labelText: 'Instance URL',
-                  hintText: 'pixelfed.social',
-                  prefixIcon: const Icon(Icons.language),
-                  errorText: _errorMessage,
-                ),
-                keyboardType: TextInputType.url,
-                textInputAction: TextInputAction.go,
-                onSubmitted: (value) {
-                  if (value.isNotEmpty) {
-                    _selectInstance(value);
-                  }
-                },
-              ),
-              const SizedBox(height: 16),
+                  // Custom instance input
+                  TextField(
+                    controller: _instanceController,
+                    decoration: InputDecoration(
+                      labelText: 'Instance URL',
+                      hintText: 'pixelfed.social',
+                      prefixIcon: const Icon(Icons.language),
+                      errorText: _errorMessage,
+                    ),
+                    keyboardType: TextInputType.url,
+                    textInputAction: TextInputAction.go,
+                    onSubmitted: (value) {
+                      if (value.isNotEmpty) {
+                        _selectInstance(value);
+                      }
+                    },
+                  ),
+                  const SizedBox(height: 16),
 
-              // Connect button
-              ElevatedButton(
-                onPressed: () {
-                  final instance = _instanceController.text.trim();
-                  if (instance.isNotEmpty) {
-                    _selectInstance(instance);
-                  }
-                },
-                child: const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 4),
-                  child: Text('Connect', style: TextStyle(fontSize: 16)),
-                ),
-              ),
+                  // Connect button
+                  ElevatedButton(
+                    onPressed: () {
+                      final instance = _instanceController.text.trim();
+                      if (instance.isNotEmpty) {
+                        _selectInstance(instance);
+                      }
+                    },
+                    child: const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 4),
+                      child: Text('Connect', style: TextStyle(fontSize: 16)),
+                    ),
+                  ),
 
-              const SizedBox(height: 32),
-              const Divider(),
-              const SizedBox(height: 16),
+                  const SizedBox(height: 32),
+                  const Divider(),
+                  const SizedBox(height: 16),
 
-              // Popular instances list
-              Text(
-                'Popular Instances',
-                style: Theme.of(
-                  context,
-                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 16),
+                  // Popular instances list
+                  Text(
+                    'Popular Instances',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
 
-              // Instance list
-              Expanded(
-                child: ListView.builder(
-                  itemCount: knownInstances.length,
-                  itemBuilder: (context, index) {
-                    final instance = knownInstances[index];
-                    return Card(
-                      margin: const EdgeInsets.only(bottom: 12),
-                      child: ListTile(
-                        leading: CircleAvatar(
-                          backgroundColor: AppColors.primaryColor,
-                          child: Text(
-                            instance.name[0].toUpperCase(),
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
+                  // Instance list
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: knownInstances.length,
+                      itemBuilder: (context, index) {
+                        final instance = knownInstances[index];
+                        return Card(
+                          margin: const EdgeInsets.only(bottom: 12),
+                          child: ListTile(
+                            leading: CircleAvatar(
+                              backgroundColor: AppColors.primaryColor,
+                              child: Text(
+                                instance.name[0].toUpperCase(),
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                             ),
+                            title: Text(
+                              instance.name,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            subtitle: Text(
+                              instance.url,
+                              style: TextStyle(color: AppColors.secondaryText),
+                            ),
+                            trailing: const Icon(
+                              Icons.arrow_forward_ios,
+                              size: 16,
+                            ),
+                            onTap: () => _selectInstance(instance.url),
                           ),
-                        ),
-                        title: Text(
-                          instance.name,
-                          style: const TextStyle(fontWeight: FontWeight.w600),
-                        ),
-                        subtitle: Text(
-                          instance.url,
-                          style: TextStyle(color: AppColors.secondaryText),
-                        ),
-                        trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                        onTap: () => _selectInstance(instance.url),
-                      ),
-                    );
-                  },
-                ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
       ),
