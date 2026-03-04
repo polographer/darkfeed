@@ -3,6 +3,30 @@ import 'dart:ui';
 import 'package:darkfeed/utils/constants.dart';
 import 'package:darkfeed/models/post.dart';
 
+/// Test fixtures for authentication testing
+class AuthTestFixtures {
+  /// Create a test UserAccount with default or custom values
+  static UserAccount createTestUserAccount({
+    String id = 'user123',
+    String username = 'testuser',
+    String displayName = 'Test User',
+    String avatar = 'https://example.com/avatar.jpg',
+    int followersCount = 100,
+    int followingCount = 50,
+    int statusesCount = 10,
+  }) {
+    return UserAccount(
+      id: id,
+      username: username,
+      displayName: displayName,
+      avatar: avatar,
+      followersCount: followersCount,
+      followingCount: followingCount,
+      statusesCount: statusesCount,
+    );
+  }
+}
+
 /// Test fixtures for general testing
 class TestFixtures {
   /// Create a test post with default or custom values
