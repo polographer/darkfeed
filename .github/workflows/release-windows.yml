@@ -1,0 +1,113 @@
+name: Build and Release Windows
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version number (e.g., 1.0.0)'
+        required: false
+        type: string
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    permissions:
+      contents: write  # Required to upload assets to releases
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Extract version from tag or input
+        id: version
+        shell: bash
+        run: |
+          if [ -n "${{ github.event.inputs.version }}" ]; then
+            VERSION="${{ github.event.inputs.version }}"
+          elif [ -n "${{ github.event.release.tag_name }}" ]; then
+            VERSION="${{ github.event.release.tag_name }}"
+            # Remove 'v' prefix if present
+            VERSION="${VERSION#v}"
+          else
+            # Extract from pubspec.yaml
+            VERSION=$(grep "^version:" pubspec.yaml | sed 's/version: *//' | sed 's/+.*//')
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Building version: $VERSION"
+      
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      
+      - name: Verify Flutter installation
+        run: |
+          flutter --version
+          flutter doctor -v
+      
+      - name: Get Flutter dependencies
+        run: flutter pub get
+      
+      - name: Run tests
+        run: |
+          Write-Host "Running tests before building..."
+          flutter test
+          Write-Host "All tests passed!"
+      
+      - name: Build Windows application
+        run: flutter build windows --release
+      
+      - name: Create Windows archive
+        shell: pwsh
+        run: |
+          $VERSION = "${{ steps.version.outputs.version }}"
+          $ARCHIVE_NAME = "darkfeed-$VERSION-windows-x64"
+          
+          # Create output directory
+          New-Item -ItemType Directory -Force -Path "release-output"
+          
+          # Copy build artifacts
+          Copy-Item -Path "build\windows\x64\runner\Release\*" -Destination "release-output\" -Recurse -Force
+          
+          # Create ZIP archive
+          Compress-Archive -Path "release-output\*" -DestinationPath "$ARCHIVE_NAME.zip" -Force
+          
+          Write-Host "Created archive: $ARCHIVE_NAME.zip"
+          Get-ChildItem -Path "$ARCHIVE_NAME.zip" | Format-List Name, Length
+      
+      - name: Upload Windows build as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: darkfeed-${{ steps.version.outputs.version }}-windows-x64
+          path: darkfeed-${{ steps.version.outputs.version }}-windows-x64.zip
+          if-no-files-found: error
+      
+      - name: Upload Windows build to release
+        if: github.event_name == 'release'
+        uses: softprops/action-gh-release@v1
+        with:
+          files: darkfeed-${{ steps.version.outputs.version }}-windows-x64.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Generate checksums
+        if: github.event_name == 'release'
+        shell: pwsh
+        run: |
+          $VERSION = "${{ steps.version.outputs.version }}"
+          $ARCHIVE_NAME = "darkfeed-$VERSION-windows-x64.zip"
+          
+          $hash = Get-FileHash -Path $ARCHIVE_NAME -Algorithm SHA256
+          "$($hash.Hash)  $ARCHIVE_NAME" | Out-File -FilePath "checksums.txt" -Encoding utf8
+          Get-Content checksums.txt
+      
+      - name: Upload checksums to release
+        if: github.event_name == 'release'
+        uses: softprops/action-gh-release@v1
+        with:
+          files: checksums.txt
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
