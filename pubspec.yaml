@@ -38,21 +38,21 @@ dependencies:
   provider: ^6.1.1
   
   # OAuth & API (Pixelfed/Mastodon compatible)
-  flutter_web_auth_2: ^5.0.0
+  flutter_web_auth_2: ^5.1.0
   mastodon_api: ^0.6.1
   
   # Storage
-  flutter_secure_storage: ^10.0.0
+  flutter_secure_storage: ^11.2.0
   shared_preferences: ^2.2.2
   
   # Networking & Images
   http: ^0.13.6
   cached_network_image: ^3.3.1
-  desktop_webview_window: ^0.2.3
+  desktop_webview_window: ^0.3.0
   url_launcher: ^6.3.2
   
   # Window Management (Desktop)
-  window_manager: ^0.3.9
+  window_manager: ^0.5.2
 
 dev_dependencies:
   flutter_test:

@@ -1,0 +1,108 @@
+name: Build and Release macOS
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version number (e.g., 1.0.0)'
+        required: false
+        type: string
+
+jobs:
+  build-macos:
+    runs-on: macos-latest
+    permissions:
+      contents: write  # Required to upload assets to releases
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Extract version from tag or input
+        id: version
+        run: |
+          if [ -n "${{ github.event.inputs.version }}" ]; then
+            VERSION="${{ github.event.inputs.version }}"
+          elif [ -n "${{ github.event.release.tag_name }}" ]; then
+            VERSION="${{ github.event.release.tag_name }}"
+            # Remove 'v' prefix if present
+            VERSION="${VERSION#v}"
+          else
+            # Extract from pubspec.yaml
+            VERSION=$(grep "^version:" pubspec.yaml | sed 's/version: *//' | sed 's/+.*//')
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Building version: $VERSION"
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Verify Flutter installation
+        run: |
+          flutter --version
+          flutter doctor -v
+
+      - name: Get Flutter dependencies
+        run: flutter pub get
+
+      - name: Run tests
+        run: |
+          echo "Running tests before building..."
+          flutter test
+          echo "All tests passed!"
+
+      - name: Build macOS app
+        run: flutter build macos --release
+
+      - name: Create macOS archive
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          ARCHIVE_NAME="darkfeed-${VERSION}-macos-x64"
+
+          # Create output directory
+          mkdir -p release-output
+
+          # Copy the app bundle
+          cp -R build/macos/build/Release/*.app release-output/
+
+          # Create compressed archive
+          ditto -c -k --keepParent release-output/*.app "${ARCHIVE_NAME}.zip"
+
+          echo "Created archive: ${ARCHIVE_NAME}.zip"
+          ls -lh "${ARCHIVE_NAME}.zip"
+
+      - name: Upload macOS build as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: darkfeed-${{ steps.version.outputs.version }}-macos-x64
+          path: darkfeed-${{ steps.version.outputs.version }}-macos-x64.zip
+          if-no-files-found: error
+
+      - name: Upload macOS build to release
+        if: github.event_name == 'release'
+        uses: softprops/action-gh-release@v1
+        with:
+          files: darkfeed-${{ steps.version.outputs.version }}-macos-x64.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate checksums
+        if: github.event_name == 'release'
+        run: |
+          ARCHIVE_NAME="darkfeed-${{ steps.version.outputs.version }}-macos-x64.zip"
+          hash=$(shasum -a 256 "$ARCHIVE_NAME" | awk '{print $1}')
+          echo "${hash}  ${ARCHIVE_NAME}" > checksums.txt
+          cat checksums.txt
+
+      - name: Upload checksums to release
+        if: github.event_name == 'release'
+        uses: softprops/action-gh-release@v1
+        with:
+          files: checksums.txt
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
