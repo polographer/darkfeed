@@ -215,6 +215,10 @@ jobs:
   build-android:
     runs-on: ubuntu-24.04
     if: github.event_name == 'push'
+    env:
+      ANDROID_HOME: ${{ github.workspace }}/android-sdk
+      ANDROID_SDK_ROOT: ${{ github.workspace }}/android-sdk
+      JAVA_HOME: ${{ github.workspace }}/java
     steps:
       - name: Checkout
         uses: actions/checkout@v5
@@ -228,6 +232,7 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
+          java-package: jdk
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
@@ -236,7 +241,7 @@ jobs:
 
       - name: Install Android SDK packages
         run: |
-          sdkmanager "platforms;android-36" "build-tools;35.0.0"
+          sdkmanager "platforms;android-36" "build-tools;35.0.0" "cmdline-tools;latest" "ndk;28.2.2012257"
           yes | sdkmanager --licenses
 
       - name: Install Flutter
@@ -248,6 +253,9 @@ jobs:
 
       - name: Get dependencies
         run: flutter pub get
+
+      - name: Verify Flutter Android setup
+        run: flutter doctor -v
 
       - name: Build Android APK
         run: flutter build apk --release
