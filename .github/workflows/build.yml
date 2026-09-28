@@ -110,7 +110,7 @@ jobs:
       - name: Install system dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev libwebkit2gtk-4.0-dev
+          sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev libwebkit2gtk-4.1-dev
 
       - name: Install Java 17
         uses: actions/setup-java@v5
@@ -234,16 +234,10 @@ jobs:
 
       - name: Install Android SDK & accept licenses
         run: |
-          # GitHub Actions runner may already have cmdline-tools; ensure sdkmanager is available
-          if ! command -v sdkmanager &> /dev/null; then
-            mkdir -p $ANDROID_HOME/cmdline-tools/latest
-            wget -q https://dl.google.com/android/repository/commandlinetools-linux-12266719_latest.zip -O /tmp/cmdline-tools.zip
-            unzip -q /tmp/cmdline-tools.zip -d /tmp/cmdline-tools-tmp
-            mv /tmp/cmdline-tools-tmp/cmdline-tools/* $ANDROID_HOME/cmdline-tools/latest/
-            rm -rf /tmp/cmdline-tools-tmp /tmp/cmdline-tools.zip
-          fi
-          sdkmanager "platforms;android-36" "build-tools;35.0.0"
-          yes | sdkmanager --licenses
+          # GitHub Actions runner has ANDROID_HOME pre-configured with cmdline-tools
+          # Just install the packages we need
+          sdkmanager "platforms;android-36" "build-tools;35.0.0" || true
+          yes | sdkmanager --licenses || true
 
       - name: Get dependencies
         run: flutter pub get
