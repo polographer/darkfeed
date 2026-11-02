@@ -65,8 +65,10 @@ jobs:
           ls -la build/macos/Build/Products/Release/ 2>/dev/null || echo "Build/Products/Release not found"
 
       - name: Create macOS archive
+        id: archive
         run: |
           VERSION="${{ steps.version.outputs.version }}"
+          ARCH=$(uname -m)
           
           # Find the .app bundle (may be in different locations on x64 vs ARM64)
           APP_DIR=""
@@ -85,7 +87,7 @@ jobs:
             exit 1
           fi
           
-          ARCHIVE_NAME="darkfeed-${VERSION}-macos-$(uname -m)"
+          ARCHIVE_NAME="darkfeed-${VERSION}-macos-${ARCH}"
           
           # Create output directory
           mkdir -p release-output
@@ -98,26 +100,30 @@ jobs:
           
           echo "Created archive: ${ARCHIVE_NAME}.zip"
           ls -lh "${ARCHIVE_NAME}.zip"
+          
+          # Export for downstream steps
+          echo "archive_name=${ARCHIVE_NAME}" >> $GITHUB_OUTPUT
+          echo "archive_file=${ARCHIVE_NAME}.zip" >> $GITHUB_OUTPUT
 
       - name: Upload macOS build as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: darkfeed-${{ steps.version.outputs.version }}-macos-$(uname -m)
-          path: darkfeed-${{ steps.version.outputs.version }}-macos-$(uname -m).zip
+          name: darkfeed-${{ steps.version.outputs.version }}-macos-${{ steps.archive.outputs.archive_name && 'macos-' }}${{ runner.arch == 'ARM64' && 'arm64' || 'x64' }}
+          path: ${{ steps.archive.outputs.archive_file }}
           if-no-files-found: error
 
       - name: Upload macOS build to release
         if: github.event_name == 'release'
         uses: softprops/action-gh-release@v1
         with:
-          files: darkfeed-${{ steps.version.outputs.version }}-macos-$(uname -m).zip
+          files: ${{ steps.archive.outputs.archive_file }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Generate checksums
         if: github.event_name == 'release'
         run: |
-          ARCHIVE_NAME="darkfeed-${{ steps.version.outputs.version }}-macos-$(uname -m).zip"
+          ARCHIVE_NAME="${{ steps.archive.outputs.archive_name }}.zip"
           hash=$(shasum -a 256 "$ARCHIVE_NAME" | awk '{print $1}')
           echo "${hash}  ${ARCHIVE_NAME}" > checksums.txt
           cat checksums.txt
