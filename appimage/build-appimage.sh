@@ -25,9 +25,15 @@ else
     APP_VERSION="1.0.0"
 fi
 ARCH=$(uname -m)
+# Normalize architecture name for Flutter build paths
+case "$ARCH" in
+    aarch64) FLUTCH="arm64" ;;
+    x86_64)  FLUTCH="x64" ;;
+    *)       FLUTCH="x64" ;;
+esac
 
-echo -e "${GREEN}Building version: ${APP_VERSION}${NC}"
-BUILD_DIR="$(pwd)/build/linux/x64/release/bundle"
+echo -e "${GREEN}Building version: ${APP_VERSION} (${ARCH})${NC}"
+BUILD_DIR="$(pwd)/build/linux/${FLUTCH}/release/bundle"
 APPDIR="$(pwd)/appimage/AppDir"
 OUTPUT_DIR="$(pwd)/appimage/output"
 
@@ -41,7 +47,7 @@ fi
 if ! command -v appimagetool &> /dev/null; then
     echo -e "${YELLOW}Warning: appimagetool not found. Attempting to download...${NC}"
     
-    APPIMAGETOOL_URL="https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-${ARCH}.AppImage"
+    APPIMAGETOOL_URL="https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage"
     wget -O /tmp/appimagetool "${APPIMAGETOOL_URL}"
     chmod +x /tmp/appimagetool
     # Use --appimage-extract-and-run for CI environments without FUSE

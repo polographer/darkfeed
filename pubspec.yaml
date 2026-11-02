@@ -32,7 +32,7 @@ dependencies:
     sdk: flutter
 
   # UI
-  cupertino_icons: ^1.0.8
+  cupertino_icons: ^2.0.0
   
   # State Management
   provider: ^6.1.1
@@ -48,7 +48,7 @@ dependencies:
   # Networking & Images
   http: ^0.13.6
   cached_network_image: ^3.3.1
-  desktop_webview_window: ^0.3.0
+  desktop_webview_window: ^0.3.2
   url_launcher: ^6.3.2
   
   # Window Management (Desktop)
