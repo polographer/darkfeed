@@ -57,7 +57,12 @@ jobs:
           echo "All tests passed!"
 
       - name: Build macOS app
-        run: flutter build macos --release
+        run: |
+          set -e
+          flutter build macos --release --verbose 2>&1 | tail -50
+          echo "Build output:"
+          ls -la build/macos/build/Release/ 2>/dev/null || echo "Release dir not found"
+          ls -la build/macos/Build/Products/Release/ 2>/dev/null || echo "Build/Products/Release not found"
 
       - name: Create macOS archive
         run: |
