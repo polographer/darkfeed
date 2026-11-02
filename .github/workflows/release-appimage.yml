@@ -158,12 +158,15 @@ jobs:
             file \
             desktop-file-utils
       
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: '3.47.5'
-          channel: stable
-          cache: true
+      - name: Setup Flutter (ARM64 Linux)
+        run: |
+          # subosito/flutter-action doesn't support ARM64 Linux SDK caching
+          # Download and extract Flutter SDK manually
+          cd $HOME
+          wget -q https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.47.5-stable.tar.xz -O flutter.tar.xz
+          tar xf flutter.tar.xz
+          echo "$HOME/flutter/bin" >> $GITHUB_PATH
+          flutter --version
       
       - name: Verify Flutter installation
         run: |
