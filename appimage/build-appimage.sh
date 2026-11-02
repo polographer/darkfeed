@@ -47,7 +47,7 @@ fi
 if ! command -v appimagetool &> /dev/null; then
     echo -e "${YELLOW}Warning: appimagetool not found. Attempting to download...${NC}"
     
-    APPIMAGETOOL_URL="https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage"
+    APPIMAGETOOL_URL="https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-${ARCH}.AppImage"
     wget -O /tmp/appimagetool "${APPIMAGETOOL_URL}"
     chmod +x /tmp/appimagetool
     # Use --appimage-extract-and-run for CI environments without FUSE
