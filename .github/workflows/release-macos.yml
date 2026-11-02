@@ -67,39 +67,57 @@ jobs:
       - name: Create macOS archive
         run: |
           VERSION="${{ steps.version.outputs.version }}"
-          ARCHIVE_NAME="darkfeed-${VERSION}-macos-x64"
-
+          
+          # Find the .app bundle (may be in different locations on x64 vs ARM64)
+          APP_DIR=""
+          if [ -d "build/macos/build/Release" ]; then
+            APP_DIR="build/macos/build/Release"
+          elif [ -d "build/macos/Build/Products/Release" ]; then
+            APP_DIR="build/macos/Build/Products/Release"
+          fi
+          
+          if [ -z "$APP_DIR" ] || [ -z "$(ls -d $APP_DIR/*.app 2>/dev/null)" ]; then
+            echo "ERROR: No .app bundle found in expected locations"
+            echo "build/macos/build/Release exists: $([ -d build/macos/build/Release ] && echo yes || echo no)"
+            echo "build/macos/Build/Products/Release exists: $([ -d build/macos/Build/Products/Release ] && echo yes || echo no)"
+            echo "Contents of build/macos/build/:"
+            ls -la build/macos/build/ 2>/dev/null || true
+            exit 1
+          fi
+          
+          ARCHIVE_NAME="darkfeed-${VERSION}-macos-$(uname -m)"
+          
           # Create output directory
           mkdir -p release-output
-
+          
           # Copy the app bundle
-          cp -R build/macos/build/Release/*.app release-output/
-
+          cp -R "$APP_DIR"/*.app release-output/
+          
           # Create compressed archive
           ditto -c -k --keepParent release-output/*.app "${ARCHIVE_NAME}.zip"
-
+          
           echo "Created archive: ${ARCHIVE_NAME}.zip"
           ls -lh "${ARCHIVE_NAME}.zip"
 
       - name: Upload macOS build as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: darkfeed-${{ steps.version.outputs.version }}-macos-x64
-          path: darkfeed-${{ steps.version.outputs.version }}-macos-x64.zip
+          name: darkfeed-${{ steps.version.outputs.version }}-macos-$(uname -m)
+          path: darkfeed-${{ steps.version.outputs.version }}-macos-$(uname -m).zip
           if-no-files-found: error
 
       - name: Upload macOS build to release
         if: github.event_name == 'release'
         uses: softprops/action-gh-release@v1
         with:
-          files: darkfeed-${{ steps.version.outputs.version }}-macos-x64.zip
+          files: darkfeed-${{ steps.version.outputs.version }}-macos-$(uname -m).zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Generate checksums
         if: github.event_name == 'release'
         run: |
-          ARCHIVE_NAME="darkfeed-${{ steps.version.outputs.version }}-macos-x64.zip"
+          ARCHIVE_NAME="darkfeed-${{ steps.version.outputs.version }}-macos-$(uname -m).zip"
           hash=$(shasum -a 256 "$ARCHIVE_NAME" | awk '{print $1}')
           echo "${hash}  ${ARCHIVE_NAME}" > checksums.txt
           cat checksums.txt
