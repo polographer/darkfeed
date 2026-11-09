@@ -40,24 +40,20 @@ jobs:
 
       - name: Install system dependencies
         run: |
-          sudo apt-get update
-          sudo apt-get install -y clang cmake ninja-build pkg-config \
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends \
+            clang cmake ninja-build pkg-config \
             libgtk-3-dev liblzma-dev libsecret-1-dev \
-            libwebkit2gtk-4.1-dev \
             flatpak flatpak-builder
-          flatpak remote-add --if-not-exists --user flathub \
+          flatpak remote-add --if-not-exists flathub \
             https://flathub.org/repo/flathub.flatpakrepo
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.47.5'
+          flutter-version: '3.38.2'
           channel: stable
           cache: true
-
-      - name: Install Flatpak SDK
-        run: |
-          flatpak install --user -y flathub runtime/org.gnome.Sdk/x86_64/47 runtime/org.gnome.Platform/x86_64/47
 
       - name: Build Flutter Linux (x86_64)
         run: |
@@ -69,12 +65,11 @@ jobs:
           cp -r build/linux/x64/release/bundle build-flatpak-x86_64
 
       - name: Build Flatpak bundle (x86_64)
-        env:
-          FLATPAK_BUNDLE_DIR: ${{ github.workspace }}/build-flatpak-x86_64
         run: |
-          flatpak-builder --force-clean --arch=x86_64 --user \
+          flatpak-builder --force-clean --arch=x86_64 \
+            --env=FLATPAK_BUNDLE_DIR=$(pwd)/build-flatpak-x86_64 \
             build-dir-x64 flatpak/${{ env.APP_ID }}.yml
-          flatpak build-bundle --user build-dir-x64 \
+          flatpak build-bundle build-dir-x64 \
             ${{ env.APP_ID }}-${{ steps.version.outputs.version }}-x86_64.flatpak \
             ${{ env.APP_ID }}
 
@@ -93,20 +88,78 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   # ── ARM64 Build ───────────────────────────────────────────────
-  # NOTE: ARM64 Linux Flatpak build is temporarily disabled because
-  # Flutter ARM64 Linux SDK binaries are only available on master channel,
-  # which has a different Dart SDK version incompatible with this project.
-  # Re-enable when Flutter provides ARM64 Linux SDK on stable channel.
-  # build-aarch64:
-  #   runs-on: ubuntu-24.04-arm
-  #   steps:
-  #     - name: Checkout
-  #       uses: actions/checkout@v4
-  #     ...
+  build-aarch64:
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Extract version
+        id: version
+        run: |
+          if [ -n "${{ github.event.inputs.version }}" ]; then
+            VERSION="${{ github.event.inputs.version }}"
+          elif [ -n "${{ github.event.release.tag_name }}" ]; then
+            VERSION="${{ github.event.release.tag_name }}"
+            VERSION="${VERSION#v}"
+          else
+            VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: *//' | sed 's/+.*//')
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Building version: $VERSION"
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends \
+            clang cmake ninja-build pkg-config \
+            libgtk-3-dev liblzma-dev libsecret-1-dev \
+            flatpak flatpak-builder
+          flatpak remote-add --if-not-exists flathub \
+            https://flathub.org/repo/flathub.flatpakrepo
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.38.2'
+          channel: stable
+          cache: true
+
+      - name: Build Flutter Linux (ARM64)
+        run: |
+          flutter pub get
+          flutter build linux --release
+
+      - name: Prepare bundle directory
+        run: |
+          cp -r build/linux/arm64/release/bundle build-flatpak-aarch64
+
+      - name: Build Flatpak bundle (ARM64)
+        run: |
+          flatpak-builder --force-clean --arch=aarch64 \
+            --env=FLATPAK_BUNDLE_DIR=$(pwd)/build-flatpak-aarch64 \
+            build-dir-aarch64 flatpak/${{ env.APP_ID }}.yml
+          flatpak build-bundle build-dir-aarch64 \
+            ${{ env.APP_ID }}-${{ steps.version.outputs.version }}-aarch64.flatpak \
+            ${{ env.APP_ID }}
+
+      - name: Upload ARM64 Flatpak
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.APP_ID }}-${{ steps.version.outputs.version }}-aarch64.flatpak
+          path: ${{ env.APP_ID }}-${{ steps.version.outputs.version }}-aarch64.flatpak
+
+      - name: Upload to release (ARM64)
+        if: github.event_name == 'release'
+        uses: softprops/action-gh-release@v1
+        with:
+          files: ${{ env.APP_ID }}-${{ steps.version.outputs.version }}-aarch64.flatpak
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   # ── Checksums ─────────────────────────────────────────────────
   checksums:
-    needs: [build-x64]
+    needs: [build-x64, build-aarch64]
     runs-on: ubuntu-latest
     if: github.event_name == 'release'
     steps:

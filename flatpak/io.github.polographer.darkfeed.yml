@@ -3,7 +3,8 @@ runtime: org.gnome.Platform
 runtime-version: '47'
 sdk: org.gnome.Sdk
 command: darkfeed
-
+command-environment:
+  LD_LIBRARY_PATH: /app/lib
 finish-args:
   - --share=network
   - --share=ipc
@@ -11,19 +12,40 @@ finish-args:
   - --socket=wayland
   - --socket=pulseaudio
   - --device=dri
+finish-args-add-default: false
 
 modules:
   - name: darkfeed
     buildsystem: simple
-    build-commands:
-      # Copy the Flutter Linux bundle
-      - mkdir -p /app/lib/darkfeed
-      - cp -a "$FLATPAK_BUNDLE_DIR/." /app/lib/darkfeed/
-      # Create wrapper script
-      - |
-        mkdir -p /app/bin
-        printf '%s\n' '#!/bin/bash' 'export LD_LIBRARY_PATH="/app/lib/darkfeed/lib:${LD_LIBRARY_PATH}"' 'exec /app/lib/darkfeed/darkfeed "$@"' > /app/bin/darkfeed
-        chmod +x /app/bin/darkfeed
+    build-commands: []
+    sources:
+      # Copy pre-built Flutter Linux bundle into the Flatpak build dir
+      - type: script
+        scripts:
+          - |
+            mkdir -p bundle
+            cp -a "$FLATPAK_BUNDLE_DIR/." bundle/
+        dest: bundle
+
+      # Desktop entry
+      - type: file
+        path: io.github.polographer.darkfeed.desktop
+
+      # AppStream metadata
+      - type: file
+        path: io.github.polographer.darkfeed.metainfo.xml
+
+      # App icons
+      - type: directory
+        path: icons
+
+    install-commands:
+      # Install the Flutter binary
+      - install -Dm755 bundle/darkfeed /app/bin/darkfeed
+      # Install Flutter engine libraries
+      - cp -a bundle/lib /app/
+      # Install Flutter assets (next to binary for relative path resolution)
+      - cp -a bundle/flutter_assets /app/bin/
       # Desktop entry
       - install -Dm644 io.github.polographer.darkfeed.desktop -t /app/share/applications/
       # AppStream metadata
@@ -34,21 +56,3 @@ modules:
       - install -Dm644 icons/512x512/io.github.polographer.darkfeed.png -t /app/share/icons/hicolor/512x512/apps/
       - install -Dm644 icons/1024x1024/io.github.polographer.darkfeed.png -t /app/share/icons/hicolor/1024x1024/apps/
       - install -Dm644 icons/metadata.json /app/share/icons/hicolor/metadata.json
-    sources:
-      # Desktop entry
-      - type: file
-        path: io.github.polographer.darkfeed.desktop
-      # AppStream metadata
-      - type: file
-        path: io.github.polographer.darkfeed.metainfo.xml
-      # App icons
-      - type: file
-        path: icons/128x128/io.github.polographer.darkfeed.png
-      - type: file
-        path: icons/256x256/io.github.polographer.darkfeed.png
-      - type: file
-        path: icons/512x512/io.github.polographer.darkfeed.png
-      - type: file
-        path: icons/1024x1024/io.github.polographer.darkfeed.png
-      - type: file
-        path: icons/metadata.json
