@@ -1,0 +1,45 @@
+app-id: io.github.polographer.darkfeed
+runtime: org.freedesktop.Platform
+runtime-version: '24.08'
+sdk: org.freedesktop.Sdk
+command: darkfeed
+
+finish-args:
+  - --share=network
+  - --share=ipc
+  - --socket=fallback-x11
+  - --socket=wayland
+  - --socket=pulseaudio
+  - --device=dri
+
+modules:
+  - name: darkfeed
+    buildsystem: simple
+    build-commands:
+      # Install the Flutter Linux bundle
+      - install -d /app/lib/darkfeed
+      - cp -a linux-bundle/* /app/lib/darkfeed/
+      # Create wrapper script
+      - install -d /app/bin
+      - cat > /app/bin/darkfeed << 'EOF'
+#!/bin/bash
+SELF=$(readlink -f "$0")
+HERE=${SELF%/*}
+export LD_LIBRARY_PATH="/app/lib/darkfeed/lib:${LD_LIBRARY_PATH}"
+export XDG_DATA_DIRS="/app/share:${XDG_DATA_DIRS}"
+exec /app/lib/darkfeed/darkfeed "$@"
+EOF
+      - chmod +x /app/bin/darkfeed
+      # Install desktop file
+      - install -Dm644 darkfeed.desktop /app/share/applications/io.github.polographer.darkfeed.desktop
+      # Install icon
+      - install -Dm644 darkfeed.png /app/share/icons/hicolor/256x256/apps/io.github.polographer.darkfeed.png
+    sources:
+      - type: dir
+        path: linux-bundle
+      - type: file
+        path: appimage/darkfeed.desktop
+        dest-filename: darkfeed.desktop
+      - type: file
+        path: web/icons/circus-negative.png
+        dest-filename: darkfeed.png

@@ -1,0 +1,100 @@
+name: Build Flatpak
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version number (e.g., 1.0.0)'
+        required: false
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  build-flatpak:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/flathub/injected/master:latest
+      options: --privileged
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Extract version from tag or input
+        id: version
+        run: |
+          if [ -n "${{ github.event.inputs.version }}" ]; then
+            VERSION="${{ github.event.inputs.version }}"
+          elif [ -n "${{ github.event.release.tag_name }}" ]; then
+            VERSION="${{ github.event.release.tag_name }}"
+            VERSION="${VERSION#v}"
+          else
+            VERSION=$(grep "^version:" pubspec.yaml | sed 's/version: *//' | sed 's/+.*//')
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Building version: $VERSION"
+
+      - name: Install Flutter dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev libwebkit2gtk-4.1-dev
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.47.5'
+          channel: stable
+          cache: true
+
+      - name: Build Flutter Linux app
+        run: |
+          flutter config --enable-linux-desktop
+          flutter pub get
+          flutter build linux --release
+
+      - name: Prepare linux-bundle directory
+        run: |
+          mkdir -p linux-bundle
+          cp -r build/linux/x64/release/bundle/* linux-bundle/
+
+      - name: Install flatpak-builder
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y flatpak flatpak-builder
+
+      - name: Build Flatpak
+        run: |
+          flatpak-builder --force-clean --keep-build-dirs build-dir io.github.polographer.darkfeed.yaml
+          flatpak build-bundle build-dir darkfeed-${{ steps.version.outputs.version }}.flatpak io.github.polographer.darkfeed
+
+      - name: Upload Flatpak as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: darkfeed-${{ steps.version.outputs.version }}.flatpak
+          path: darkfeed-${{ steps.version.outputs.version }}.flatpak
+          if-no-files-found: error
+
+      - name: Upload Flatpak to release
+        if: github.event_name == 'release'
+        uses: softprops/action-gh-release@v1
+        with:
+          files: darkfeed-${{ steps.version.outputs.version }}.flatpak
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate checksums
+        if: github.event_name == 'release'
+        run: |
+          sha256sum darkfeed-${{ steps.version.outputs.version }}.flatpak > checksums-flatpak.txt
+          cat checksums-flatpak.txt
+
+      - name: Upload checksums to release
+        if: github.event_name == 'release'
+        uses: softprops/action-gh-release@v1
+        with:
+          files: checksums-flatpak.txt
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
