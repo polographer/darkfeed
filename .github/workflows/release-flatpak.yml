@@ -69,9 +69,10 @@ jobs:
           cp -r build/linux/x64/release/bundle build-flatpak-x86_64
 
       - name: Build Flatpak bundle (x86_64)
+        env:
+          FLATPAK_BUNDLE_DIR: ${{ github.workspace }}/build-flatpak-x86_64
         run: |
           flatpak-builder --force-clean --arch=x86_64 --user \
-            --env=FLATPAK_BUNDLE_DIR=$(pwd)/build-flatpak-x86_64 \
             build-dir-x64 flatpak/${{ env.APP_ID }}.yml
           flatpak build-bundle --user build-dir-x64 \
             ${{ env.APP_ID }}-${{ steps.version.outputs.version }}-x86_64.flatpak \
