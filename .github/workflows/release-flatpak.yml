@@ -57,6 +57,7 @@ jobs:
 
       - name: Install Flatpak SDK
         run: |
+          sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
           sudo flatpak install -y flathub runtime/org.gnome.Sdk/x86_64/47 runtime/org.gnome.Platform/x86_64/47
 
       - name: Build Flutter Linux (x86_64)
