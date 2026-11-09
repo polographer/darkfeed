@@ -38,7 +38,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y flatpak flatpak-builder
-          flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+          flatpak remote-add --if-not-exists --user flathub https://flathub.org/repo/flathub.flatpakrepo
 
       - name: Install Flutter dependencies
         run: |
@@ -65,7 +65,7 @@ jobs:
 
       - name: Install Flatpak SDK
         run: |
-          flatpak install -y flathub org.freedesktop.Sdk org.freedesktop.Platform org.freedesktop.Platform.Locale 24.08 || true
+          flatpak install --user -y flathub org.freedesktop.Sdk org.freedesktop.Platform 24.08 || true
 
       - name: Build Flatpak
         run: |
