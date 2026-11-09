@@ -57,7 +57,7 @@ jobs:
 
       - name: Install Flatpak SDK
         run: |
-          flatpak install -y flathub org.gnome.Sdk org.gnome.Platform 47 || true
+          flatpak install -y flathub runtime/org.gnome.Sdk/x86_64/47 runtime/org.gnome.Platform/x86_64/47
 
       - name: Build Flutter Linux (x86_64)
         run: |
