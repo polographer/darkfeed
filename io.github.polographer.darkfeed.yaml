@@ -18,15 +18,12 @@ modules:
     build-commands:
       # Install the Flutter Linux bundle
       - install -d /app/lib/darkfeed
-      - cp -a linux-bundle/* /app/lib/darkfeed/
+      - cp -a * /app/lib/darkfeed/
       # Create wrapper script
       - install -d /app/bin
       - cat > /app/bin/darkfeed << 'EOF'
 #!/bin/bash
-SELF=$(readlink -f "$0")
-HERE=${SELF%/*}
 export LD_LIBRARY_PATH="/app/lib/darkfeed/lib:${LD_LIBRARY_PATH}"
-export XDG_DATA_DIRS="/app/share:${XDG_DATA_DIRS}"
 exec /app/lib/darkfeed/darkfeed "$@"
 EOF
       - chmod +x /app/bin/darkfeed
