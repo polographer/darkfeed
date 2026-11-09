@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>io.github.polographer.darkfeed</id>
+
+  <name>DarkFeed</name>
+  <summary>A Pixelfed client with vertical swipe navigation</summary>
+
+  <developer id="io.github.polographer">
+    <name>Polographer</name>
+  </developer>
+
+  <url type="homepage">https://github.com/polographer/darkfeed</url>
+  <url type="bugtracker">https://github.com/polographer/darkfeed/issues</url>
+  <url type="vcs-browser">https://github.com/polographer/darkfeed</url>
+
+  <metadata_license>FSFAP</metadata_license>
+  <project_license>AGPL-3.0-only</project_license>
+
+  <description>
+    <p>
+      DarkFeed is a feature-rich Pixelfed client for Linux with vertical swipe
+      navigation. It provides a clean, dark-themed interface for browsing
+      the Pixelfed photo-sharing network.
+    </p>
+    <p>
+      Features:
+    </p>
+    <ul>
+      <li>Vertical swipe navigation for seamless browsing</li>
+      <li>Dark theme optimized for comfort</li>
+      <li>OAuth authentication with Pixelfed instances</li>
+      <li>Support for multiple Pixelfed accounts</li>
+      <li>High-quality image viewing</li>
+    </ul>
+  </description>
+
+  <launchable type="desktop-id">io.github.polographer.darkfeed.desktop</launchable>
+
+  <screenshots>
+    <screenshot type="default">
+      <caption>DarkFeed main feed</caption>
+    </screenshot>
+  </screenshots>
+
+  <content_rating type="oars-1.1"/>
+
+  <releases>
+    <release version="1.0.0" date="2025-01-01" type="initial">
+      <description>
+        <p>Initial release of DarkFeed for Linux via Flatpak.</p>
+      </description>
+    </release>
+  </releases>
+</component>

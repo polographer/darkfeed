@@ -1,0 +1,24 @@
+{
+  "icon_types": [
+    {
+      "height": 128,
+      "width": 128,
+      "description": "128x128 pixel PNG icon"
+    },
+    {
+      "height": 256,
+      "width": 256,
+      "description": "256x256 pixel PNG icon"
+    },
+    {
+      "height": 512,
+      "width": 512,
+      "description": "512x512 pixel PNG icon"
+    },
+    {
+      "height": 1024,
+      "width": 1024,
+      "description": "1024x1024 pixel PNG icon"
+    }
+  ]
+}

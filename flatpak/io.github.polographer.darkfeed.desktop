@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=DarkFeed
+Comment=A Pixelfed client with vertical swipe navigation
+Exec=darkfeed %u
+Icon=io.github.polographer.darkfeed
+Type=Application
+Categories=Network;InstantMessaging;
+Terminal=false
+StartupWMClass=darkfeed
+MimeType=x-scheme-handler/darkfeed;
