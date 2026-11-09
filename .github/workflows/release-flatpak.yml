@@ -57,8 +57,7 @@ jobs:
 
       - name: Install Flatpak SDK
         run: |
-          sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
-          sudo flatpak install -y flathub runtime/org.gnome.Sdk/x86_64/47 runtime/org.gnome.Platform/x86_64/47
+          flatpak install --user -y flathub runtime/org.gnome.Sdk/x86_64/47 runtime/org.gnome.Platform/x86_64/47
 
       - name: Build Flutter Linux (x86_64)
         run: |
@@ -73,9 +72,9 @@ jobs:
         env:
           FLATPAK_BUNDLE_DIR: ${{ github.workspace }}/build-flatpak-x86_64
         run: |
-          flatpak-builder --force-clean --arch=x86_64 \
+          flatpak-builder --force-clean --arch=x86_64 --user \
             build-dir-x64 flatpak/${{ env.APP_ID }}.yml
-          flatpak build-bundle build-dir-x64 \
+          flatpak build-bundle --user build-dir-x64 \
             ${{ env.APP_ID }}-${{ steps.version.outputs.version }}-x86_64.flatpak \
             ${{ env.APP_ID }}
 
