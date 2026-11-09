@@ -16,20 +16,13 @@ modules:
   - name: darkfeed
     buildsystem: simple
     build-commands:
-      # Install the Flutter Linux bundle
       - install -d /app/lib/darkfeed
       - cp -a * /app/lib/darkfeed/
-      # Create wrapper script
-      - install -d /app/bin
-      - cat > /app/bin/darkfeed << 'EOF'
-#!/bin/bash
-export LD_LIBRARY_PATH="/app/lib/darkfeed/lib:${LD_LIBRARY_PATH}"
-exec /app/lib/darkfeed/darkfeed "$@"
-EOF
-      - chmod +x /app/bin/darkfeed
-      # Install desktop file
+      - |
+        install -d /app/bin
+        printf '%s\n' '#!/bin/bash' 'export LD_LIBRARY_PATH="/app/lib/darkfeed/lib:${LD_LIBRARY_PATH}"' 'exec /app/lib/darkfeed/darkfeed "$@"' > /app/bin/darkfeed
+        chmod +x /app/bin/darkfeed
       - install -Dm644 darkfeed.desktop /app/share/applications/io.github.polographer.darkfeed.desktop
-      # Install icon
       - install -Dm644 darkfeed.png /app/share/icons/hicolor/256x256/apps/io.github.polographer.darkfeed.png
     sources:
       - type: dir
