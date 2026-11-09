@@ -16,9 +16,6 @@ permissions:
 jobs:
   build-flatpak:
     runs-on: ubuntu-latest
-    container:
-      image: ghcr.io/flathub/injected/master:latest
-      options: --privileged
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -36,6 +33,12 @@ jobs:
           fi
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "Building version: $VERSION"
+
+      - name: Install Flatpak dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y flatpak flatpak-builder
+          flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
 
       - name: Install Flutter dependencies
         run: |
@@ -60,10 +63,9 @@ jobs:
           mkdir -p linux-bundle
           cp -r build/linux/x64/release/bundle/* linux-bundle/
 
-      - name: Install flatpak-builder
+      - name: Install Flatpak SDK
         run: |
-          sudo apt-get update
-          sudo apt-get install -y flatpak flatpak-builder
+          flatpak install -y flathub org.freedesktop.Sdk org.freedesktop.Platform org.freedesktop.Platform.Locale 24.08 || true
 
       - name: Build Flatpak
         run: |
