@@ -55,9 +55,9 @@ jobs:
           channel: stable
           cache: true
 
-      - name: Install Flatpak SDK (x86_64)
+      - name: Install Flatpak SDK
         run: |
-          flatpak install --user -y flathub org.gnome.Sdk org.gnome.Platform 47 || true
+          flatpak install -y flathub org.gnome.Sdk org.gnome.Platform 47 || true
 
       - name: Build Flutter Linux (x86_64)
         run: |
@@ -72,9 +72,9 @@ jobs:
         env:
           FLATPAK_BUNDLE_DIR: ${{ github.workspace }}/build-flatpak-x86_64
         run: |
-          flatpak-builder --force-clean --arch=x86_64 --user \
+          flatpak-builder --force-clean --arch=x86_64 \
             build-dir-x64 flatpak/${{ env.APP_ID }}.yml
-          flatpak build-bundle --user build-dir-x64 \
+          flatpak build-bundle build-dir-x64 \
             ${{ env.APP_ID }}-${{ steps.version.outputs.version }}-x86_64.flatpak \
             ${{ env.APP_ID }}
 
